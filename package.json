@@ -1,0 +1,28 @@
+{
+  "name": "repo-finpro-backinterm",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "db:codegen": "kysely-codegen --out-file ./src/db/db.d.ts",
+    "db:make": "kysely migrate make",
+    "db:up": "kysely migrate up",
+    "db:down": "kysely migrate down",
+    "db:latest": "kysely migrate latest",
+    "db:seed": "kysely seed run"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.23.1",
+    "kysely-ctl": "^0.22.0"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "hono": "^4.13.19",
+    "kysely": "^0.29.9",
+    "kysely-codegen": "^0.20.0",
+    "pg": "^8.23.1"
+  }
+}
