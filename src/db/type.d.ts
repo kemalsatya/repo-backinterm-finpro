@@ -5,16 +5,17 @@
 
 import type { ColumnType } from "kysely";
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+    T extends ColumnType<infer S, infer I, infer U>
+        ? ColumnType<S, I | undefined, U>
+        : ColumnType<T, T | undefined, T>;
 
 export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
 
 export type JsonObject = {
-  [x: string]: JsonValue | undefined;
+    [x: string]: JsonValue | undefined;
 };
 
 export type JsonPrimitive = boolean | number | string | null;
@@ -24,85 +25,85 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface BuyerEventQuota {
-  event_id: string;
-  ticket_count: Generated<number>;
-  user_id: string;
+    event_id: string;
+    ticket_count: Generated<number>;
+    user_id: string;
 }
 
 export interface Events {
-  created_at: Generated<Timestamp>;
-  description: string | null;
-  id: Generated<string>;
-  organizer_id: string;
-  starts_at: Timestamp;
-  title: string;
-  venue: string;
+    created_at: Generated<Timestamp>;
+    description: string | null;
+    id: Generated<string>;
+    organizer_id: string;
+    starts_at: Timestamp;
+    title: string;
+    venue: string;
 }
 
 export interface OrderItems {
-  event_id: string;
-  id: Generated<string>;
-  order_id: string;
-  quantity: number;
-  ticket_type_id: string;
-  unit_price: number;
+    event_id: string;
+    id: Generated<string>;
+    order_id: string;
+    quantity: number;
+    ticket_type_id: string;
+    unit_price: number;
 }
 
 export interface Orders {
-  cancelled_at: Timestamp | null;
-  created_at: Generated<Timestamp>;
-  event_id: string;
-  expires_at: Timestamp;
-  id: Generated<string>;
-  paid_at: Timestamp | null;
-  status: Generated<string>;
-  total_amount: number;
-  user_id: string;
+    cancelled_at: Timestamp | null;
+    created_at: Generated<Timestamp>;
+    event_id: string;
+    expires_at: Timestamp;
+    id: Generated<string>;
+    paid_at: Timestamp | null;
+    status: Generated<string>;
+    total_amount: number;
+    user_id: string;
 }
 
 export interface PaymentEvents {
-  amount: number;
-  id: Generated<string>;
-  order_id: string;
-  outcome: string;
-  payload: Json;
-  provider_event_id: string;
-  received_at: Generated<Timestamp>;
-  status: string;
+    amount: number;
+    id: Generated<string>;
+    order_id: string;
+    outcome: string;
+    payload: Json;
+    provider_event_id: string;
+    received_at: Generated<Timestamp>;
+    status: string;
 }
 
 export interface Tickets {
-  code: string;
-  id: Generated<string>;
-  issued_at: Generated<Timestamp>;
-  order_item_id: string;
-  seq: number;
+    code: string;
+    id: Generated<string>;
+    issued_at: Generated<Timestamp>;
+    order_item_id: string;
+    seq: number;
 }
 
 export interface TicketTypes {
-  event_id: string;
-  id: Generated<string>;
-  name: string;
-  price: number;
-  quota: number;
-  reserved: Generated<number>;
+    event_id: string;
+    id: Generated<string>;
+    name: string;
+    price: number;
+    quota: number;
+    reserved: Generated<number>;
 }
 
 export interface Users {
-  created_at: Generated<Timestamp>;
-  email: string;
-  id: Generated<string>;
-  name: string;
-  role: string;
+    created_at: Generated<Timestamp>;
+    email: string;
+    id: Generated<string>;
+    name: string;
+    role: string;
 }
 
 export interface DB {
-  buyer_event_quota: BuyerEventQuota;
-  events: Events;
-  order_items: OrderItems;
-  orders: Orders;
-  payment_events: PaymentEvents;
-  ticket_types: TicketTypes;
-  tickets: Tickets;
-  users: Users;
+    buyer_event_quota: BuyerEventQuota;
+    events: Events;
+    order_items: OrderItems;
+    orders: Orders;
+    payment_events: PaymentEvents;
+    ticket_types: TicketTypes;
+    tickets: Tickets;
+    users: Users;
 }
