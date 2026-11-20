@@ -9,7 +9,7 @@
         "includes": ["**", "!**/node_modules", "!**/dist", "!**/coverage", "!**/local"]
     },
     "formatter": {
-        "enabled": true,    
+        "enabled": true,
         "indentStyle": "space",
         "indentWidth": 4,
         "lineWidth": 100

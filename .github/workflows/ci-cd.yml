@@ -1,0 +1,21 @@
+name: CI
+on:
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get clone code
+              uses: actions/checkout@v4
+            - name: Bun setup
+              uses: oven-sh//setup-bun@v2
+            - name: Install dependencies
+              run: bun ci
+            - name: Check formatting, linting, and imports
+              run: bunx biome ci
+            - name: Type check
+              run: bunx tsc --noEmit
