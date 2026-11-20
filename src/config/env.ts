@@ -9,11 +9,7 @@ const postgres = {
 
 const credentials = `${postgres.user}:${encodeURIComponent(postgres.password)}`;
 
-const SUPPORTED_ALGORITHMS = [
-    "HS256",
-    "HS384",
-    "HS512",
-] as const;
+const SUPPORTED_ALGORITHMS = ["HS256", "HS384", "HS512"] as const;
 
 type JwtAlgorithm = (typeof SUPPORTED_ALGORITHMS)[number];
 
