@@ -1,17 +1,8 @@
-import { Pool } from 'pg'
 import { defineConfig } from 'kysely-ctl'
-import { Kysely, PostgresDialect } from 'kysely'
-import type { DB } from './src/db/type'
+import { createDb } from './src/db/dialect'
 
-const dialect = new PostgresDialect({
-  pool: new Pool({ connectionString: process.env.DATABASE_URL })
+export default defineConfig({
+  kysely: createDb(),
+  migrations: { migrationFolder: 'src/db/migrations' },
+  seeds: { seedFolder: 'src/db/seeds' },
 })
-const migrations = {
-  migrationFolder: 'src/db/migrations',
-}
-const seeds = {
-  seedFolder: 'src/db/seeds',
-}
-
-// const db = new Kysely<DB>({ dialect })
-export default defineConfig({ dialect, migrations, seeds })
