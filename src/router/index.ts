@@ -1,9 +1,12 @@
 import { Hono } from "hono";
-import authRoute from "../modules/auth/auth.routes";
+import authRoutes from "../modules/auth/auth.routes";
+import eventRoutes from "../modules/events/events.route";
+import organizerRoutes from "../modules/organizer/organizer.route";
 
 const router = new Hono();
 
-//router.route()
-router.route("/auth", authRoute);
+router.route("/auth", authRoutes);
+router.route("/organizer", organizerRoutes);
+router.route("/events", eventRoutes);
 
 export default router;
