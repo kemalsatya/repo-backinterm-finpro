@@ -8,6 +8,6 @@ export const createToken = async (userId: string, role: string) => {
         exp: Math.floor(Date.now() / 1000) + 60 * 15, // Token expires in 15 minutes
     };
     const secret = ENV.jwt_secret;
-    const token = await sign(payload, secret);
+    const token = await sign(payload, secret, ENV.jwt_alg);
     return token;
 };
