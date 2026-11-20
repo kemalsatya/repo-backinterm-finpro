@@ -20,9 +20,11 @@
     "typescript": "^7"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.9.1",
     "hono": "^4.13.19",
     "kysely": "^0.29.9",
     "kysely-codegen": "^0.20.0",
-    "pg": "^8.23.1"
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
   }
 }

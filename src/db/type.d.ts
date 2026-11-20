@@ -39,6 +39,15 @@ export interface Events {
   venue: string;
 }
 
+export interface OrderItems {
+  event_id: string;
+  id: Generated<string>;
+  order_id: string;
+  quantity: number;
+  ticket_type_id: string;
+  unit_price: number;
+}
+
 export interface Orders {
   cancelled_at: Timestamp | null;
   created_at: Generated<Timestamp>;
@@ -46,11 +55,8 @@ export interface Orders {
   expires_at: Timestamp;
   id: Generated<string>;
   paid_at: Timestamp | null;
-  quantity: number;
   status: Generated<string>;
-  ticket_type_id: string;
   total_amount: number;
-  unit_price: number;
   user_id: string;
 }
 
@@ -69,7 +75,7 @@ export interface Tickets {
   code: string;
   id: Generated<string>;
   issued_at: Generated<Timestamp>;
-  order_id: string;
+  order_item_id: string;
   seq: number;
 }
 
@@ -93,6 +99,7 @@ export interface Users {
 export interface DB {
   buyer_event_quota: BuyerEventQuota;
   events: Events;
+  order_items: OrderItems;
   orders: Orders;
   payment_events: PaymentEvents;
   ticket_types: TicketTypes;
