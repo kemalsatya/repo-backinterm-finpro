@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { validator } from "../../utils/validator";
 import * as authControllers from "./auth.controller";
-import * as authSchemas from "./auth.schemas";
+import * as authSchemas from "./auth.schema";
 
 const route = new Hono();
 
