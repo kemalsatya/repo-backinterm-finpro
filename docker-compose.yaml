@@ -27,6 +27,9 @@ services:
             dockerfile: Dockerfile
         container_name: backend-app
         restart: unless-stopped
+        depends_on:
+            db:
+                condition: service_healthy
         ports:
             - "${PORT:-8500}:8500"
         environment:
