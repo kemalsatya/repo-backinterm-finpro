@@ -56,7 +56,7 @@ export const bootstrapTestDb = async () => {
 
 export const truncateAll = async () => {
     await getPool().query(
-        "TRUNCATE TABLE tickets, order_items, orders, buyer_event_quota, ticket_types, payment_events, events, users RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE tickets, order_items, orders, buyer_event_quota, ticket_types, events, users RESTART IDENTITY CASCADE",
     );
 };
 
