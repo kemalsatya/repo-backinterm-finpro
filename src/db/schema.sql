@@ -72,14 +72,3 @@ CREATE TABLE tickets (
   issued_at      timestamptz NOT NULL DEFAULT now(),
   UNIQUE (order_item_id, seq)
 );
-
-CREATE TABLE payment_events (
-  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider_event_id  text NOT NULL UNIQUE,
-  order_id           uuid NOT NULL REFERENCES orders(id),
-  status             text NOT NULL CHECK (status IN ('success','failed')),
-  amount             integer NOT NULL,
-  outcome            text NOT NULL,
-  payload            jsonb NOT NULL,
-  received_at        timestamptz NOT NULL DEFAULT now()
-);

@@ -1,4 +1,7 @@
+import { randomUUID } from "node:crypto";
+import type { Selectable, Transaction } from "kysely";
 import { db } from "../../db";
+import type { DB, Orders } from "../../db/type";
 import { AppError } from "../../utils/app-error";
 import type {
     orderDTO,
@@ -122,6 +125,123 @@ export const listBuyerOrders = async (userId: string): Promise<orderDTO[]> => {
     return rows.map((row) => toOrder(row, itemsByOrder.get(row.id) ?? []));
 };
 
+const releaseOrderQuota = async (
+    trx: Transaction<DB>,
+    order: Pick<Selectable<Orders>, "id" | "event_id" | "user_id">,
+) => {
+    const items = await trx
+        .selectFrom("order_items")
+        .select(["ticket_type_id", "quantity"])
+        .where("order_id", "=", order.id)
+        .execute();
+
+    for (const item of items) {
+        await trx
+            .updateTable("ticket_types")
+            .set((eb) => ({ reserved: eb("reserved", "-", item.quantity) }))
+            .where("id", "=", item.ticket_type_id)
+            .execute();
+    }
+
+    const total = items.reduce((sum, item) => sum + item.quantity, 0);
+    await trx
+        .updateTable("buyer_event_quota")
+        .set((eb) => ({ ticket_count: eb("ticket_count", "-", total) }))
+        .where("event_id", "=", order.event_id)
+        .where("user_id", "=", order.user_id)
+        .execute();
+};
+
+const expireOrder = async (
+    trx: Transaction<DB>,
+    order: Pick<Selectable<Orders>, "id" | "event_id" | "user_id">,
+) => {
+    await trx.updateTable("orders").set({ status: "expired" }).where("id", "=", order.id).execute();
+
+    await releaseOrderQuota(trx, order);
+};
+
+export const expireStaleOrders = async (limit = 100): Promise<number> =>
+    await db.transaction().execute(async (trx) => {
+        const stale = await trx
+            .selectFrom("orders")
+            .selectAll()
+            .where("status", "=", "pending")
+            .where("expires_at", "<=", new Date())
+            .orderBy("expires_at")
+            .limit(limit)
+            .forUpdate()
+            .skipLocked()
+            .execute();
+
+        for (const order of stale) {
+            await expireOrder(trx, order);
+        }
+
+        return stale.length;
+    });
+
+export const payOrder = async (orderId: string, userId: string): Promise<orderDTO> => {
+    const now = new Date();
+
+    const outcome = await db.transaction().execute(async (trx) => {
+        const order = await trx
+            .selectFrom("orders")
+            .selectAll()
+            .where("id", "=", orderId)
+            .where("user_id", "=", userId)
+            .forUpdate()
+            .executeTakeFirst();
+
+        if (!order) throw new AppError("ORDER_NOT_FOUND", "Order not found");
+
+        if (order.status !== "pending") {
+            throw new AppError("ORDER_NOT_PENDING", "Order is not pending");
+        }
+
+        // Lazy expiry: commit the expiry (and quota release) even though the
+        // request will be answered with 410.
+        if (order.expires_at <= now) {
+            await expireOrder(trx, order);
+
+            return "expired" as const;
+        }
+
+        await trx
+            .updateTable("orders")
+            .set({ status: "paid", paid_at: now })
+            .where("id", "=", order.id)
+            .where("status", "=", "pending")
+            .execute();
+
+        const items = await trx
+            .selectFrom("order_items")
+            .select(["id", "quantity"])
+            .where("order_id", "=", order.id)
+            .execute();
+
+        const tickets = items.flatMap((item) =>
+            Array.from({ length: item.quantity }, (_, index) => ({
+                order_item_id: item.id,
+                seq: index + 1,
+                code: `TKT-${randomUUID()}`,
+            })),
+        );
+
+        if (tickets.length > 0) {
+            await trx.insertInto("tickets").values(tickets).execute();
+        }
+
+        return "paid" as const;
+    });
+
+    if (outcome === "expired") {
+        throw new AppError("ORDER_NOT_PENDING", "Order has expired");
+    }
+
+    return getBuyerOrderDetail(orderId, userId);
+};
+
 export const getBuyerOrderDetail = async (orderId: string, userId: string): Promise<orderDTO> => {
     const row: orderRowDTO | undefined = await selectBuyerOrders(userId)
         .where("orders.id", "=", orderId)
@@ -132,4 +252,49 @@ export const getBuyerOrderDetail = async (orderId: string, userId: string): Prom
     const itemsByOrder = await fetchItemsAndTickets([row.id]);
 
     return toOrder(row, itemsByOrder.get(row.id) ?? []);
+};
+
+export const cancelOrder = async (orderId: string, userId: string): Promise<orderDTO> => {
+    const now = new Date();
+
+    const outcome = await db.transaction().execute(async (trx) => {
+        const order = await trx
+            .selectFrom("orders")
+            .selectAll()
+            .where("id", "=", orderId)
+            .where("user_id", "=", userId)
+            .forUpdate()
+            .executeTakeFirst();
+
+        if (!order) throw new AppError("ORDER_NOT_FOUND", "Order not found");
+
+        if (order.status !== "pending") {
+            throw new AppError("ORDER_NOT_PENDING", "Order is not pending");
+        }
+
+        // Lazy expiry: commit the expiry (and quota release) even though the
+        // request will be answered with 410.
+        if (order.expires_at <= now) {
+            await expireOrder(trx, order);
+
+            return "expired" as const;
+        }
+
+        await trx
+            .updateTable("orders")
+            .set({ status: "cancelled", cancelled_at: now })
+            .where("id", "=", order.id)
+            .where("status", "=", "pending")
+            .execute();
+
+        await releaseOrderQuota(trx, order);
+
+        return "cancelled" as const;
+    });
+
+    if (outcome === "expired") {
+        throw new AppError("ORDER_NOT_PENDING", "Order has expired");
+    }
+
+    return getBuyerOrderDetail(orderId, userId);
 };

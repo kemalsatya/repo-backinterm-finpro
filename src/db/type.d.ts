@@ -10,18 +10,6 @@ export type Generated<T> =
         ? ColumnType<S, I | undefined, U>
         : ColumnType<T, T | undefined, T>;
 
-export type Json = JsonValue;
-
-export type JsonArray = JsonValue[];
-
-export type JsonObject = {
-    [x: string]: JsonValue | undefined;
-};
-
-export type JsonPrimitive = boolean | number | string | null;
-
-export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
-
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface BuyerEventQuota {
@@ -61,17 +49,6 @@ export interface Orders {
     user_id: string;
 }
 
-export interface PaymentEvents {
-    amount: number;
-    id: Generated<string>;
-    order_id: string;
-    outcome: string;
-    payload: Json;
-    provider_event_id: string;
-    received_at: Generated<Timestamp>;
-    status: string;
-}
-
 export interface Tickets {
     code: string;
     id: Generated<string>;
@@ -102,7 +79,6 @@ export interface DB {
     events: Events;
     order_items: OrderItems;
     orders: Orders;
-    payment_events: PaymentEvents;
     ticket_types: TicketTypes;
     tickets: Tickets;
     users: Users;

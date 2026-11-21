@@ -16,3 +16,4 @@ export {
     orderTicketSchema,
     ticketSchema,
 } from "./orders.schema";
+export { startOrderExpirySweeper } from "./orders.sweeper";

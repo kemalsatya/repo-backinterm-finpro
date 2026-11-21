@@ -67,6 +67,14 @@ export const insertOrderedTickets = async (
         throw new AppError("VALIDATION_ERROR", "Duplicate ticket type in order");
     }
 
+    const eventExists = await db
+        .selectFrom("events")
+        .select("id")
+        .where("id", "=", eventId)
+        .executeTakeFirst();
+
+    if (!eventExists) throw new AppError("EVENT_NOT_FOUND", "Event not found");
+
     return await db.transaction().execute(async (trx) => {
         // Ensure a quota row exists so the FOR UPDATE lock below actually serializes
         // concurrent first-time orders from the same buyer.
