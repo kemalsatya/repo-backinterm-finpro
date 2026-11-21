@@ -133,6 +133,15 @@ const releaseOrderQuota = async (
         .selectFrom("order_items")
         .select(["ticket_type_id", "quantity"])
         .where("order_id", "=", order.id)
+        .orderBy("ticket_type_id")
+        .execute();
+
+    const total = items.reduce((sum, item) => sum + item.quantity, 0);
+    await trx
+        .updateTable("buyer_event_quota")
+        .set((eb) => ({ ticket_count: eb("ticket_count", "-", total) }))
+        .where("event_id", "=", order.event_id)
+        .where("user_id", "=", order.user_id)
         .execute();
 
     for (const item of items) {
@@ -142,14 +151,6 @@ const releaseOrderQuota = async (
             .where("id", "=", item.ticket_type_id)
             .execute();
     }
-
-    const total = items.reduce((sum, item) => sum + item.quantity, 0);
-    await trx
-        .updateTable("buyer_event_quota")
-        .set((eb) => ({ ticket_count: eb("ticket_count", "-", total) }))
-        .where("event_id", "=", order.event_id)
-        .where("user_id", "=", order.user_id)
-        .execute();
 };
 
 const expireOrder = async (
