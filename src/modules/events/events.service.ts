@@ -107,6 +107,7 @@ export const insertOrderedTickets = async (
             .select(["id", "name", "price", "quota", "reserved"])
             .where("event_id", "=", eventId)
             .where("name", "in", typeNames)
+            .orderBy("id")
             .forUpdate()
             .execute();
 
