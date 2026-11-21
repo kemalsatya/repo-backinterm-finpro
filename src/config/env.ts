@@ -1,10 +1,10 @@
 const postgres = {
-    host: Bun.env.POSTGRES_HOST ?? "localhost",
-    port: Number(Bun.env.POSTGRES_PORT ?? 5432),
-    user: Bun.env.POSTGRES_USER ?? "postgres",
-    password: Bun.env.POSTGRES_PASSWORD ?? "",
-    database: Bun.env.POSTGRES_DB ?? "database_name",
-    ssl: Bun.env.POSTGRES_SSL === "true",
+    host: process.env.POSTGRES_HOST ?? "localhost",
+    port: Number(process.env.POSTGRES_PORT ?? 5432),
+    user: process.env.POSTGRES_USER ?? "postgres",
+    password: process.env.POSTGRES_PASSWORD ?? "",
+    database: process.env.POSTGRES_DB ?? "database_name",
+    ssl: process.env.POSTGRES_SSL === "true",
 };
 
 const credentials = `${postgres.user}:${encodeURIComponent(postgres.password)}`;
@@ -14,7 +14,7 @@ const SUPPORTED_ALGORITHMS = ["HS256", "HS384", "HS512"] as const;
 type JwtAlgorithm = (typeof SUPPORTED_ALGORITHMS)[number];
 
 const resolveJwtAlgorithm = (): JwtAlgorithm => {
-    const algorithm = Bun.env.JWT_ALG ?? "HS256";
+    const algorithm = process.env.JWT_ALG ?? "HS256";
 
     if ((SUPPORTED_ALGORITHMS as readonly string[]).includes(algorithm)) {
         return algorithm as JwtAlgorithm;
@@ -28,11 +28,16 @@ const resolveJwtAlgorithm = (): JwtAlgorithm => {
 export const jwtAlgorithm: JwtAlgorithm = resolveJwtAlgorithm();
 
 export const ENV = {
-    port: Number(Bun.env.PORT ?? 8500),
+    port: Number(process.env.PORT ?? 8500),
     postgres,
-    jwt_secret: Bun.env.JWT_SECRET || "SECRET",
+    jwt_secret: process.env.JWT_SECRET || "SECRET",
     jwt_alg: jwtAlgorithm,
+    order_sweeper: {
+        enabled: process.env.ORDER_SWEEPER_ENABLED !== "false",
+        interval_ms: Number(process.env.ORDER_SWEEPER_INTERVAL_MS ?? 60_000),
+        batch_size: Number(process.env.ORDER_SWEEPER_BATCH_SIZE ?? 100),
+    },
     dbUrl:
-        Bun.env.DATABASE_URL ||
+        process.env.DATABASE_URL ||
         `postgresql://${credentials}@${postgres.host}:${postgres.port}/${postgres.database}${postgres.ssl ? "?sslmode=require" : ""}`,
 };

@@ -5,5 +5,5 @@
  * events.schema directly — so the internals can change without breaking them.
  */
 export type { createEventDTO, TicketTypeDTO } from "./events.schema";
-export { createEventSchema } from "./events.schema";
+export { createEventSchema, detailedTicketOrderSchema } from "./events.schema";
 export { getOrganizerEvent, getPublicDetailedEvent, insertEvent } from "./events.service";

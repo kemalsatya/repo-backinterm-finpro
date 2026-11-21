@@ -19,5 +19,11 @@ export const createEventSchema = z.object({
         }),
 });
 
+export const detailedTicketOrderSchema = z.object({
+    type_name: z.enum(["REGULER", "VIP"]),
+    quantity: z.number().int().min(1),
+});
+
 export type TicketTypeDTO = z.infer<typeof ticketTypeSchema>;
 export type createEventDTO = z.infer<typeof createEventSchema>;
+//export type ticketOrderDTO = z.infer<typeof detailedTicketOrderSchema>
